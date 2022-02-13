@@ -22,8 +22,11 @@ import org.springframework.stereotype.Service;
 import com.sun.mail.smtp.SMTPTransport;
 
 import emlakburada.config.EmailConfig;
+import emlakburada.util.EmailContentBuilderUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class EmailService {
 
 	@Autowired
@@ -32,10 +35,10 @@ public class EmailService {
 	public void send(String email) {
 		Properties properties = prepareSmtpServer();
 		Session session = prepareSessionWithCredentials(properties);
-		
+
 		int sendMessage = sendMessage(email, session);
 		if (sendMessage == 0) {
-			System.out.println("Mail başarıyla gönderildi!");
+			log.info("Mail başarıyla gönderildi! -> " + email);
 		}
 
 	}
@@ -58,7 +61,7 @@ public class EmailService {
 			message.setFrom(new InternetAddress(config.getFrom()));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email, false));
 			message.setSubject(config.getSubject());
-			message.setDataHandler(new DataHandler(new HTMLDataSource(EmailContentBuilder.build(email))));
+			message.setDataHandler(new DataHandler(new HTMLDataSource(EmailContentBuilderUtil.build(email))));
 			message.setSentDate(new Date());
 			SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");
 			transport.connect(config.getSmtpServer(), config.getUsername(), config.getPassword());
@@ -67,7 +70,7 @@ public class EmailService {
 			transport.close();
 
 		} catch (MessagingException e) {
-			// logger.error(e.getMessage());
+			log.error(e.getMessage());
 		}
 		return lastServerResponse;
 	}
@@ -79,8 +82,9 @@ public class EmailService {
 		properties.put("mail.smtp.auth", "true");
 		properties.put("mail.smtp.socketFactory.port", config.getSmtpPort());
 		properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		properties.put("mail.smtp.starttls.enable", "true");
 		return properties;
-	}
+	} 
 
 	static class HTMLDataSource implements DataSource {
 

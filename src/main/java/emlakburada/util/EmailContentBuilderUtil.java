@@ -1,10 +1,10 @@
-package emlakburada.service;
+package emlakburada.util;
 
-public class EmailContentBuilder {
+public class EmailContentBuilderUtil {
 	
 	private static String template = "<p>Hoş geldin ${user},</p>\n" ;
 	
-	private EmailContentBuilder() {
+	private EmailContentBuilderUtil() {
 		
 	}
 	
